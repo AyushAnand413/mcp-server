@@ -591,3 +591,31 @@ def test_list_training_jobs_runtime_not_found():
         mock_client.return_value.list_jobs.return_value = []
         valid_res = wrapped()
         assert valid_res["success"] is True
+
+
+def test_list_training_jobs_list_jobs_404_returns_sdk_error():
+    from kubernetes.client.exceptions import ApiException
+
+    with (
+        patch("kubeflow_mcp.trainer.api.discovery.check_namespace_allowed", return_value=None),
+        patch("kubeflow_mcp.trainer.api.discovery.get_trainer_client_for_namespace") as mock_client,
+    ):
+        mock_client.return_value.get_runtime.return_value = _fake_runtime("torch-distributed")
+        mock_client.return_value.list_jobs.side_effect = ApiException(
+            status=404, reason="Not Found"
+        )
+        result = list_training_jobs(runtime="torch-distributed")
+
+    error = verify_tool_error(result, error_code=ErrorCode.SDK_ERROR)
+    assert "TrainingRuntime 'torch-distributed' not found" not in error["error"]
+
+    with (
+        patch("kubeflow_mcp.trainer.api.discovery.check_namespace_allowed", return_value=None),
+        patch("kubeflow_mcp.trainer.api.discovery.get_trainer_client_for_namespace") as mock_client,
+    ):
+        mock_client.return_value.get_runtime.side_effect = ApiException(
+            status=500, reason="Internal Server Error"
+        )
+        result = list_training_jobs(runtime="torch-distributed")
+
+    verify_tool_error(result, error_code=ErrorCode.SDK_ERROR)
