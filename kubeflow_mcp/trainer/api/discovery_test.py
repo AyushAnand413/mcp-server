@@ -619,6 +619,8 @@ def test_list_training_jobs_list_jobs_404_returns_sdk_error():
         result = list_training_jobs(runtime="torch-distributed")
 
     verify_tool_error(result, error_code=ErrorCode.SDK_ERROR)
+
+
 # ─── get_training_job steps ─────────────────────────────────────────────────
 
 
