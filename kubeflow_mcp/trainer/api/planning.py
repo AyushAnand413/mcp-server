@@ -29,7 +29,7 @@ from kubeflow_mcp.common.types import ToolError, ToolResponse, exception_details
 
 logger = logging.getLogger(__name__)
 
-_HF_MODEL_ID_RE = re.compile(r"^[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+$")
+_HF_MODEL_ID_RE = re.compile(r"^(?:[a-zA-Z0-9._-]+/)?[a-zA-Z0-9._-]+$")
 
 
 _MIN_NAME_FALLBACK_LEN = 3
@@ -509,7 +509,7 @@ def estimate_resources(
     requirements based on parameter count for LoRA fine-tuning.
 
     Args:
-        model: HuggingFace model ID. Accepts ``google/gemma-2b`` or ``hf://google/gemma-2b``.
+        model: HuggingFace model ID. Accepts ``google/gemma-2b``, unscoped IDs like ``gpt2``, or with ``hf://`` prefix.
         num_workers: Number of distributed workers. Defaults to 1.
         batch_size: Per-GPU batch size. Defaults to 4.
         quantization: Weight precision — ``bf16``, ``fp16``, ``int8``, ``int4``, ``fp32``.
