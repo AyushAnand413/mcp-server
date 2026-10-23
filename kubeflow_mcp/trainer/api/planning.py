@@ -94,7 +94,12 @@ def _get_model_info_from_hf(model: str) -> dict[str, Any] | None:
     returns both for a missing repo requested anonymously and for a private repo.
     """
     try:
-        if not _HF_MODEL_ID_RE.match(model):
+        parts = model.split("/")
+        if (
+            not _HF_MODEL_ID_RE.fullmatch(model)
+            or ".." in model
+            or any(p.startswith((".", "-")) or p.endswith((".", "-")) for p in parts)
+        ):
             result: dict[str, Any] = {
                 "error": f"Invalid HuggingFace model ID format: '{model}'",
                 "kind": "format",
